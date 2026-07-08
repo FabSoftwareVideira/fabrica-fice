@@ -67,4 +67,4 @@ volumes:
 
 networks:
   fabrica-network:
-  external: true
+    external: true
