@@ -7,8 +7,8 @@ services:
     env_file: .env
     environment:
       - PGDATA=/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     volumes:
       - fabrica-fice_prod_db:/var/lib/postgresql/data
     networks:
