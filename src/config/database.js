@@ -1,9 +1,6 @@
 const { Pool } = require('pg');
 
-const configuredHost = process.env.POSTGRES_HOST || 'localhost';
-const host = configuredHost === 'db' && process.env.DOCKER_CONTAINER !== 'true'
-    ? 'localhost'
-    : configuredHost;
+const host = process.env.POSTGRES_HOST || (process.env.DOCKER_CONTAINER === 'true' ? 'db' : 'localhost');
 
 const pool = new Pool({
     host,

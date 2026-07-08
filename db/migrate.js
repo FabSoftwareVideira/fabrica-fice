@@ -3,10 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
 
-const configuredHost = process.env.POSTGRES_HOST || 'localhost';
-const host = configuredHost === 'db' && process.env.DOCKER_CONTAINER !== 'true'
-  ? 'localhost'
-  : configuredHost;
+const host = process.env.POSTGRES_HOST || (process.env.DOCKER_CONTAINER === 'true' ? 'db' : 'localhost');
 
 const poolConfig = process.env.DATABASE_URL
   ? { connectionString: process.env.DATABASE_URL }
