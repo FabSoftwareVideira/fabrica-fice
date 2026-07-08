@@ -13,7 +13,7 @@ services:
     # ports:
     #   - "5432:5432"
     volumes:
-      - fabrica-fice_prod_db:/var/lib/postgresql/data
+      - fabrica-fice_data:/var/lib/postgresql/data
     networks:
       - fabrica-network
     restart: always
@@ -70,7 +70,7 @@ services:
           memory: 128M
 
 volumes:
-  fabrica-fice_prod_db:
+  fabrica-fice_data:
 
 networks:
   fabrica-network:
