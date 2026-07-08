@@ -2,7 +2,7 @@ name: fabrica-fice
 
 services:
   db:
-    container_name: fabrica-fice-db # MUDE O NOME DO CONTAINER PARA SEU PROJETO
+    container_name: fabrica-fice-db
     image: pgvector/pgvector:pg16
     env_file: .env
     environment:
@@ -21,7 +21,7 @@ services:
       retries: 5
 
   web:
-    container_name: fabrica-fice-web # MUDE O NOME DO CONTAINER PARA SEU PROJETO
+    container_name: fabrica-fice-web
     build:
       context: .
       target: dev
