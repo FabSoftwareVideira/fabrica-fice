@@ -73,3 +73,5 @@ volumes:
 networks:
   fabrica-network:
     external: true
+  # fabrica-network:
+  #   driver: bridge
