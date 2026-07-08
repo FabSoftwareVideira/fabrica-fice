@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="retro-page admin-page">
+    <div class="stars"></div>
+    <main class="dashboard">
+        <header class="panel header-panel">
+            <div>
+                <p class="label">PAINEL ADMIN</p>
+                <h1>Mapa da Fábrica</h1>
+            </div>
+            <a class="btn secondary" href="/">Voltar ao início</a>
+        </header>
+
+        <% if (typeof error !=='undefined' && error) { %>
+            <div class="message error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <section class="stats-grid">
+                    <article class="panel stat-card">
+                        <h2>
+                            <%= stats.totalVisitors %>
+                        </h2>
+                        <p>Visitantes registrados</p>
+                    </article>
+                    <article class="panel stat-card">
+                        <h2>
+                            <%= stats.redeemed %>
+                        </h2>
+                        <p>Recompensas liberadas</p>
+                    </article>
+                    <article class="panel stat-card">
+                        <h2>
+                            <%= stats.pending %>
+                        </h2>
+                        <p>Aguardando retirada</p>
+                    </article>
+                </section>
+
+                <section class="panel list-panel">
+                    <h3>Últimos registros</h3>
+                    <ul class="recent-list">
+                        <% recent.forEach(item=> { %>
+                            <li>
+                                <span>#<%= item.id %></span>
+                                <span>
+                                    <%= item.event_id %>
+                                </span>
+                                <span>
+                                    <%= item.reward_given ? 'Liberado' : 'Pendente' %>
+                                </span>
+                                <span>
+                                    <%= new Date(item.captured_at).toLocaleString('pt-BR') %>
+                                </span>
+                            </li>
+                            <% }) %>
+                    </ul>
+                </section>
+    </main>
+</body>
+
+</html>

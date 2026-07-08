@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="retro-page reward-page">
+    <div class="stars"></div>
+    <main class="interaction-card">
+        <h1>Estação de Recompensa</h1>
+        <p>Posicione o rosto na câmera para liberar sua recompensa.</p>
+        <video id="video" autoplay muted playsinline></video>
+        <button id="verifyBtn" disabled>Carregando câmera...</button>
+        <div id="status"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="/js/face-utils.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const btn = document.getElementById('verifyBtn');
+        const statusEl = document.getElementById('status');
+
+        async function init() {
+            try {
+                await loadModels();
+                await startWebcam(video);
+                btn.disabled = false;
+                btn.textContent = 'Verificar rosto';
+                statusEl.textContent = 'Câmera pronta!';
+            } catch (error) {
+                console.error(error);
+                statusEl.textContent = 'Não foi possível carregar o reconhecimento facial.';
+            }
+        }
+
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            statusEl.textContent = 'Detectando rosto...';
+
+            const embedding = await captureDescriptor(video);
+            if (!embedding) {
+                statusEl.textContent = 'Não consegui ver seu rosto, tente novamente.';
+                btn.disabled = false;
+                return;
+            }
+
+            statusEl.textContent = 'Verificando...';
+            const result = await sendToApi('/api/verify', embedding);
+
+            switch (result.status) {
+                case 'reward_granted':
+                    statusEl.textContent = 'Recompensa liberada! Aproveite.';
+                    break;
+                case 'already_redeemed':
+                    statusEl.textContent = 'Essa recompensa já foi retirada anteriormente.';
+                    break;
+                case 'ambiguous':
+                    statusEl.textContent = 'Não tenho certeza, chame um atendente.';
+                    break;
+                case 'not_found':
+                    statusEl.textContent = 'Não encontramos seu registro. Você passou pelo stand?';
+                    break;
+                default:
+                    statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
+            }
+
+            btn.disabled = false;
+        });
+
+        init();
+    </script>
+</body>
+
+</html>

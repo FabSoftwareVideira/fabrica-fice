@@ -3,7 +3,7 @@ name: fabrica-fice
 services:
   db:
     container_name: fabrica-fice-db # MUDE O NOME DO CONTAINER PARA SEU PROJETO
-    image: postgres:18.3-alpine
+    image: pgvector/pgvector:pg16
     env_file: .env
     environment:
       - PGDATA=/var/lib/postgresql/data

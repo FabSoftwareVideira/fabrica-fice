@@ -3,9 +3,13 @@
 // e gerar um "descritor" de 128 numeros que representa aquele rosto.
 // So o descritor (nao a foto) e enviado ao backend.
 
-const MODEL_URL = 'models';
+const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
 
 async function loadModels() {
+  if (typeof faceapi === 'undefined' || !faceapi?.nets) {
+    throw new Error('face-api.js não carregou corretamente.');
+  }
+
   await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
   await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
   await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);

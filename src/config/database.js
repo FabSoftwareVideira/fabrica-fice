@@ -1,7 +1,12 @@
 const { Pool } = require('pg');
 
+const configuredHost = process.env.POSTGRES_HOST || 'localhost';
+const host = configuredHost === 'db' && process.env.DOCKER_CONTAINER !== 'true'
+    ? 'localhost'
+    : configuredHost;
+
 const pool = new Pool({
-    host: process.env.POSTGRES_HOST || 'localhost',
+    host,
     port: process.env.POSTGRES_PORT || 5432,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,

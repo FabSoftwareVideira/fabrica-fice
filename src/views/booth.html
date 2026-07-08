@@ -41,18 +41,25 @@
   <button id="captureBtn" disabled>Carregando camera...</button>
   <div id="status"></div>
 
-  <script src="js/face-utils.js"></script>
+  <script defer src="/js/face-utils.js"></script>
   <script>
     const video = document.getElementById('video');
     const btn = document.getElementById('captureBtn');
     const statusEl = document.getElementById('status');
 
     async function init() {
-      await loadModels();
-      await startWebcam(video);
-      btn.disabled = false;
-      btn.textContent = 'Registrar minha visita';
+      try {
+        await loadModels();
+        await startWebcam(video);
+        btn.disabled = false;
+        btn.textContent = 'Registrar minha visita';
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = 'Não foi possível carregar o reconhecimento facial. Verifique a conexão e o navegador.';
+      }
     }
+
+    window.addEventListener('load', init);
 
     btn.addEventListener('click', async () => {
       btn.disabled = true;
@@ -79,7 +86,6 @@
       btn.disabled = false;
     });
 
-    init();
   </script>
 </body>
 
