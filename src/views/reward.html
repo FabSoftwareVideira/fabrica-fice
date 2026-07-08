@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Estacao de recompensa</title>
+<script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+  body { font-family: sans-serif; text-align: center; padding: 24px; }
+  video { width: 480px; max-width: 90vw; border-radius: 8px; background: #000; }
+  button { font-size: 18px; padding: 12px 24px; margin-top: 16px; cursor: pointer; }
+  #status { margin-top: 16px; font-size: 20px; font-weight: bold; min-height: 28px; }
+  .ok { color: #1a7d3a; }
+  .warn { color: #b5872a; }
+  .err { color: #b53a2a; }
+</style>
+</head>
+<body>
+  <h1>Retire sua recompensa</h1>
+  <video id="video" autoplay muted playsinline></video>
+  <br>
+  <button id="verifyBtn" disabled>Carregando camera...</button>
+  <div id="status"></div>
+
+  <script src="js/face-utils.js"></script>
+  <script>
+    const video = document.getElementById('video');
+    const btn = document.getElementById('verifyBtn');
+    const statusEl = document.getElementById('status');
+
+    async function init() {
+      await loadModels();
+      await startWebcam(video);
+      btn.disabled = false;
+      btn.textContent = 'Verificar rosto';
+    }
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      statusEl.className = '';
+      statusEl.textContent = 'Detectando rosto...';
+
+      const embedding = await captureDescriptor(video);
+      if (!embedding) {
+        statusEl.className = 'warn';
+        statusEl.textContent = 'Nao consegui ver seu rosto, tente novamente.';
+        btn.disabled = false;
+        return;
+      }
+
+      statusEl.textContent = 'Verificando...';
+      const result = await sendToApi('/api/verify', embedding);
+
+      switch (result.status) {
+        case 'reward_granted':
+          statusEl.className = 'ok';
+          statusEl.textContent = 'Recompensa liberada! Aproveite.';
+          break;
+        case 'already_redeemed':
+          statusEl.className = 'warn';
+          statusEl.textContent = 'Essa recompensa ja foi retirada anteriormente.';
+          break;
+        case 'ambiguous':
+          statusEl.className = 'warn';
+          statusEl.textContent = 'Nao tenho certeza, chame um atendente para conferir.';
+          break;
+        case 'not_found':
+          statusEl.className = 'err';
+          statusEl.textContent = 'Nao encontramos seu registro. Voce passou pelo stand?';
+          break;
+        default:
+          statusEl.className = 'err';
+          statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
+      }
+
+      btn.disabled = false;
+    });
+
+    init();
+  </script>
+</body>
+</html>
