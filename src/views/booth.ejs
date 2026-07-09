@@ -65,7 +65,7 @@
             const result = await sendToApi('/api/capture', embedding);
 
             if (result.status === 'registered') {
-                statusEl.textContent = 'Visita registrada com sucesso! <br>Vá até a estação de recompensa para liberar seu prêmio.';
+                statusEl.textContent = 'Visita registrada com sucesso! Vá até a estação de recompensa para liberar seu prêmio.';
             } else if (result.status === 'already_registered') {
                 statusEl.textContent = 'Você já estava registrado..';
             } else {
