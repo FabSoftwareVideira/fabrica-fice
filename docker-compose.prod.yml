@@ -46,7 +46,7 @@ services:
     # ports:
     #   - "3003:3000"
     depends_on:
-      db:
+      fabrica-fice-db:
         condition: service_healthy
     env_file: .env
     environment:
