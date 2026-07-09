@@ -50,7 +50,7 @@ a:hover {
   place-items: center;
   padding: 24px;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .stars {
@@ -228,11 +228,35 @@ button:disabled {
 
 .recent-list li {
   display: grid;
-  grid-template-columns: 60px 1.2fr 1fr 1.3fr;
+  grid-template-columns: 70px 1fr 90px 180px;
+  align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.06);
+}
+
+.recent-list .list-header {
+  background: var(--accent);
+  color: var(--bg);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.recent-list .list-header span {
+  color: var(--bg);
+}
+
+.ok {
+  color: #7cfc00;
+  font-weight: bold;
+}
+
+.warn {
+  color: var(--accent);
+  font-weight: bold;
 }
 
 .message {
@@ -259,13 +283,20 @@ button:disabled {
   .stats-grid {
     grid-template-columns: 1fr;
   }
+
   .recent-list li {
     grid-template-columns: 1fr;
   }
+
+  .recent-list .list-header {
+    display: none;
+  }
+
   .header-panel {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .actions {
     flex-direction: column;
   }

@@ -53,18 +53,25 @@
                         <p>Aguardando retirada</p>
                     </article>
                 </section>
-
                 <section class="panel list-panel">
                     <h3>Últimos registros</h3>
+
                     <ul class="recent-list">
+                        <li class="list-header">
+                            <span>ID</span>
+                            <span>Evento</span>
+                            <span>Status</span>
+                            <span>Data/Hora</span>
+                        </li>
+
                         <% recent.forEach(item=> { %>
                             <li>
                                 <span>#<%= item.id %></span>
                                 <span>
                                     <%= item.event_id %>
                                 </span>
-                                <span>
-                                    <%= item.reward_given ? 'Liberado' : 'Pendente' %>
+                                <span class="<%= item.reward_given ? 'ok' : 'warn' %>">
+                                    <%= item.reward_given ? '✔' : '⏳' %>
                                 </span>
                                 <span>
                                     <%= new Date(item.captured_at).toLocaleString('pt-BR') %>
