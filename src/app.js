@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const { pool } = require('./config/database');
 const cors = require('cors');
+const fs = require('fs');
 
 const captureRoute = require('./routes/capture');
 const verifyRoute = require('./routes/verify');
@@ -16,7 +17,13 @@ app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Arquivos estáticos
+// // Arquivos estáticos
+// // Serve logo.svg at a .png path so templates can reference /icons/logo.png
+// app.get('/icons/logo.webp', (req, res) => {
+//     res.type('image/svg+xml');
+//     res.sendFile(path.join(__dirname, 'public', 'icons', 'logo.svg'));
+// });
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes

@@ -352,3 +352,11 @@ button:disabled {
 .pwa-install-button.show {
   display: inline-block;
 }
+
+/* Site logo */
+.site-logo {
+  width: 84px;
+  height: auto;
+  display: inline-block;
+  margin-bottom: 12px;
+}
