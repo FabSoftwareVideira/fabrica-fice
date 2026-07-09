@@ -6,11 +6,11 @@ services:
     image: pgvector/pgvector:pg16
     env_file: .env
     environment:
-      - PGDATA=/var/lib/postgresql/data
+      - PGDATA=/var/lib/postgresql/fice-data
     # ports:
     #   - "5432:5432"
     volumes:
-      - fabrica-fice-prod_data:/var/lib/postgresql/data
+      - fabrica-fice-db:/var/lib/postgresql/fice-data
     networks:
       - fabrica-network
     restart: always
@@ -67,7 +67,7 @@ services:
           memory: 128M
 
 volumes:
-  fabrica-fice-prod_data:
+  fabrica-fice-db:
 
 networks:
   fabrica-network:
