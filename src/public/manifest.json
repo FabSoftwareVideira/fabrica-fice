@@ -1,0 +1,16 @@
+{
+    "name": "Fábrica FICE",
+    "short_name": "FICE",
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "#0b1026",
+    "theme_color": "#ff4d6d",
+    "icons": [
+        {
+            "src": "/icons/favicon.ico",
+            "sizes": "512x512",
+            "type": "image/x-icon"
+        }
+    ]
+}

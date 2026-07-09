@@ -5,11 +5,11 @@ router.get('/', (req, res) => {
     res.render('home', { title: 'Fábrica FICE' });
 });
 
-router.get('/booth', (req, res) => {
+router.get('/estande', (req, res) => {
     res.render('booth', { title: 'Stand da Feira' });
 });
 
-router.get('/reward', (req, res) => {
+router.get('/recompensa', (req, res) => {
     res.render('reward', { title: 'Estação de Recompensa' });
 });
 
