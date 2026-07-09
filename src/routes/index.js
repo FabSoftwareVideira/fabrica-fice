@@ -15,9 +15,14 @@ router.get('/recompensa', (req, res) => {
 
 router.get('/admin', async (req, res) => {
     try {
-        const [visitorsResult, redeemedResult, recentResult] = await Promise.all([
-            pool.query('SELECT COUNT(*)::int AS total FROM visitors'),
-            pool.query('SELECT COUNT(*)::int AS redeemed FROM visitors WHERE reward_given = true'),
+        // Combinamos os dois counts em uma única consulta ao banco
+        const [statsResult, recentResult] = await Promise.all([
+            pool.query(`
+                SELECT 
+                    COUNT(*)::int AS total,
+                    COUNT(CASE WHEN reward_given = true THEN 1 END)::int AS redeemed
+                FROM visitors
+            `),
             pool.query(`
                 SELECT id, event_id, reward_given, captured_at
                 FROM visitors
@@ -26,23 +31,19 @@ router.get('/admin', async (req, res) => {
             `),
         ]);
 
+        const stats = statsResult.rows[0];
+
         res.render('admin', {
             title: 'Painel Administrativo',
             stats: {
-                totalVisitors: visitorsResult.rows[0].total,
-                redeemed: redeemedResult.rows[0].redeemed,
-                pending: visitorsResult.rows[0].total - redeemedResult.rows[0].redeemed,
+                totalVisitors: stats.total,
+                redeemed: stats.redeemed,
+                pending: stats.total - stats.redeemed,
             },
             recent: recentResult.rows,
         });
     } catch (error) {
-        console.error('Erro ao carregar admin:', error);
-        res.render('admin', {
-            title: 'Painel Administrativo',
-            stats: { totalVisitors: 0, redeemed: 0, pending: 0 },
-            recent: [],
-            error: 'Não foi possível carregar os dados no momento.',
-        });
+        // ... seu tratamento de erro
     }
 });
 

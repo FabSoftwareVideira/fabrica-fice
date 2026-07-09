@@ -3,7 +3,7 @@ name: fabrica-fice
 services:
   db:
     container_name: fabrica-fice-prod-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg17
     env_file: .env
     environment:
       - PGDATA=/var/lib/postgresql/fice-data
@@ -15,7 +15,7 @@ services:
     # ports:
     #   - "5432:5432"
     volumes:
-      - fabrica-fice-db:/var/lib/postgresql/fice-data
+      - fabrica-fice-data:/var/lib/postgresql/fice-data
     networks:
       - fabrica-network
     restart: always
@@ -72,7 +72,7 @@ services:
           memory: 128M
 
 volumes:
-  fabrica-fice-db:
+  fabrica-fice-data:
 
 networks:
   fabrica-network:

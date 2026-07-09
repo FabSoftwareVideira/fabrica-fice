@@ -3,7 +3,7 @@ name: fabrica-fice
 services:
   db:
     container_name: fabrica-fice-db
-    image: pgvector/pgvector:pg16
+    image: pgvector/pgvector:pg17
     env_file: .env
     environment:
       - PGDATA=/var/lib/postgresql/data
