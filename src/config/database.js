@@ -24,6 +24,7 @@ const pool = new Pool(
             max: 20,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 2000,
+            keepAlive: true, // Mantém a conexão viva para evitar timeouts
         }
 );
 

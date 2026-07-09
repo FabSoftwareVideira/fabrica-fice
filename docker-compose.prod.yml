@@ -1,7 +1,7 @@
 name: fabrica-fice
 
 services:
-  db:
+  fabrica-fice-db:
     container_name: fabrica-fice-prod-db
     image: pgvector/pgvector:pg17
     env_file: .env
@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 3
 
-  web:
+  fabrica-fice-web:
     container_name: fabrica-fice-prod-web
     build:
       context: .
