@@ -9,13 +9,21 @@ const connectionString = process.env.DATABASE_URL;
 
 const pool = new Pool(
     connectionString
-        ? { connectionString }
+        ? {
+            connectionString,
+            max: 20, // Máximo de conexões no pool (ajuste conforme o plano do seu banco)
+            idleTimeoutMillis: 30000, // Tempo para fechar conexões ociosas (30s)
+            connectionTimeoutMillis: 2000, // Tempo máximo para esperar por uma conexão disponível (2s)
+        }
         : {
             host,
             port,
             user,
             password,
             database,
+            max: 20,
+            idleTimeoutMillis: 30000,
+            connectionTimeoutMillis: 2000,
         }
 );
 
