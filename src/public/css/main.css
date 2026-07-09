@@ -162,6 +162,56 @@ li {
   background: #6a4c93;
 }
 
+.btn-tertiary {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.btn.small {
+  padding: 8px 12px;
+  font-size: 0.65rem;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.login-card {
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.login-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.75rem;
+  text-align: left;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.login-form input:focus {
+  outline: 2px solid var(--secondary);
+}
+
 video {
   width: 100%;
   max-width: 480px;

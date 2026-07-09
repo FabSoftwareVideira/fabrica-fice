@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="retro-page login-page">
+    <div class="stars"></div>
+    <main class="interaction-card login-card">
+        <img src="/icons/logo.webp" alt="FICE" class="site-logo">
+        <h1>Login Admin</h1>
+        <% if (error) { %>
+            <div class="message error"><%= error %></div>
+        <% } %>
+        <form action="/admin/login" method="post" class="login-form">
+            <label>
+                Usuário
+                <input type="text" name="user" autocomplete="username" required>
+            </label>
+            <label>
+                Senha
+                <input type="password" name="password" autocomplete="current-password" required>
+            </label>
+            <button type="submit" class="btn primary">Entrar</button>
+        </form>
+        <a class="btn secondary" href="/">Voltar ao início</a>
+    </main>
+</body>
+
+</html>

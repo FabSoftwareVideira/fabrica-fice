@@ -61,12 +61,22 @@
                 <section class="panel list-panel">
                     <h3>Últimos registros</h3>
 
+                    <div class="admin-actions">
+                        <form action="/admin/clear" method="post"
+                            onsubmit="return confirm('Deseja limpar todos os registros de visitantes?');">
+                            <button type="submit" class="btn secondary">Limpar base de visitantes</button>
+                        </form>
+                        <a class="btn btn-tertiary" href="/admin/export">Exportar Lista</a>
+                        <a class="btn" href="/admin/logout">Sair</a>
+                    </div>
+
                     <ul class="recent-list">
                         <li class="list-header">
                             <span>ID</span>
                             <span>Evento</span>
                             <span>Status</span>
                             <span>Data/Hora</span>
+                            <span>Ações</span>
                         </li>
 
                         <% recent.forEach(item=> { %>
@@ -80,6 +90,12 @@
                                 </span>
                                 <span>
                                     <%= new Date(item.captured_at).toLocaleString('pt-BR') %>
+                                </span>
+                                <span>
+                                    <form action="/admin/delete/<%= item.id %>" method="post"
+                                        onsubmit="return confirm('Excluir registro #<%= item.id %>?');">
+                                        <button type="submit" class="btn small secondary">Excluir</button>
+                                    </form>
                                 </span>
                             </li>
                             <% }) %>
