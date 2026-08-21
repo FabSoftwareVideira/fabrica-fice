@@ -74,6 +74,54 @@ function clearAdminCookie(res) {
     });
 }
 
+async function loadDashboardData() {
+    const [statsResult, dailyResult, hourlyResult] = await Promise.all([
+        pool.query(`
+            SELECT
+                COUNT(*)::int AS total,
+                COUNT(CASE WHEN reward_given = true THEN 1 END)::int AS redeemed,
+                COUNT(CASE WHEN reward_given = false THEN 1 END)::int AS pending,
+                COALESCE(ROUND(100.0 * COUNT(CASE WHEN reward_given = true THEN 1 END) / NULLIF(COUNT(*), 0), 1), 0)::float AS redemption_rate,
+                MAX(captured_at) AS last_visit
+            FROM visitors
+        `),
+        pool.query(`
+            SELECT day::date AS date, visits, redeemed
+            FROM generate_series(current_date - interval '6 days', current_date, interval '1 day') AS day
+            LEFT JOIN LATERAL (
+                SELECT
+                    COUNT(*)::int AS visits,
+                    COUNT(CASE WHEN reward_given = true THEN 1 END)::int AS redeemed
+                FROM visitors
+                WHERE captured_at >= day
+                    AND captured_at < day + interval '1 day'
+            ) AS totals ON true
+            ORDER BY day
+        `),
+        pool.query(`
+            SELECT hour, COUNT(visitors.id)::int AS visits
+            FROM generate_series(0, 23) AS hours(hour)
+            LEFT JOIN visitors ON EXTRACT(HOUR FROM captured_at)::int = hour
+            GROUP BY hour
+            ORDER BY hour
+        `),
+    ]);
+
+    const stats = statsResult.rows[0];
+
+    return {
+        stats: {
+            totalVisitors: stats.total,
+            redeemed: stats.redeemed,
+            pending: stats.pending,
+            redemptionRate: stats.redemption_rate,
+            lastVisit: stats.last_visit,
+        },
+        daily: dailyResult.rows,
+        hourly: hourlyResult.rows,
+    };
+}
+
 router.get('/', (req, res) => {
     res.render('home', { title: 'Fábrica FICE' });
 });
@@ -84,6 +132,31 @@ router.get('/estande', (req, res) => {
 
 router.get('/recompensa', (req, res) => {
     res.render('reward', { title: 'Estação de Recompensa' });
+});
+
+router.get('/dashboard', async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    try {
+        const dashboard = await loadDashboardData();
+        res.render('public-dashboard', { title: 'Dashboard da FICE', ...dashboard, error: null });
+    } catch (error) {
+        res.status(500).render('public-dashboard', {
+            title: 'Dashboard da FICE',
+            stats: { totalVisitors: 0, redeemed: 0, pending: 0, redemptionRate: 0, lastVisit: null },
+            daily: [],
+            hourly: [],
+            error: 'Não foi possível carregar os dados agora. Tente novamente.',
+        });
+    }
+});
+
+router.get('/api/dashboard', async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    try {
+        res.json(await loadDashboardData());
+    } catch (error) {
+        res.status(503).json({ error: 'Não foi possível carregar os dados do dashboard.' });
+    }
 });
 
 router.get('/admin/login', (req, res) => {
@@ -109,35 +182,20 @@ router.get('/admin/logout', (req, res) => {
 
 router.get('/admin', requireAdmin, async (req, res) => {
     try {
-        const [statsResult, recentResult] = await Promise.all([
-            pool.query(`
-                SELECT 
-                    COUNT(*)::int AS total,
-                    COUNT(CASE WHEN reward_given = true THEN 1 END)::int AS redeemed
-                FROM visitors
-            `),
-            pool.query(`
-                SELECT id, event_id, reward_given, captured_at
-                FROM visitors
-                ORDER BY captured_at DESC
-                LIMIT 8
-            `),
-        ]);
-        const stats = statsResult.rows[0];
+        const recentResult = await pool.query(`
+            SELECT id, event_id, reward_given, captured_at
+            FROM visitors
+            ORDER BY captured_at DESC
+            LIMIT 8
+        `);
         res.render('admin', {
             title: 'Painel Administrativo',
-            stats: {
-                totalVisitors: stats.total,
-                redeemed: stats.redeemed,
-                pending: stats.total - stats.redeemed,
-            },
             recent: recentResult.rows,
             error: null,
         });
     } catch (error) {
         res.status(500).render('admin', {
             title: 'Painel Administrativo',
-            stats: { totalVisitors: 0, redeemed: 0, pending: 0 },
             recent: [],
             error: 'Falha ao carregar dados do painel. Tente novamente.',
         });

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff4d6d">
+    <link rel="icon" href="/icons/favicon.ico">
+</head>
+
+<body class="retro-page admin-page public-dashboard-page">
+    <div class="stars"></div>
+    <main class="dashboard">
+        <header class="panel header-panel">
+            <img src="/icons/logo.webp" alt="FICE" class="site-logo">
+            <div>
+                <p class="label">ACOMPANHE A FEIRA</p>
+                <h1>FICE · 2026</h1>
+            </div>
+            <a class="btn secondary" href="/">Início</a>
+        </header>
+
+        <% if (error) { %>
+            <div class="message error">
+                <%= error %>
+            </div>
+            <% } %>
+
+                <section class="stats-grid public-stats-grid">
+                    <article class="panel stat-card">
+                        <h2>
+                            <%= stats.totalVisitors %>
+                        </h2>
+                        <p>Visitas ao stand</p>
+                    </article>
+                    <article class="panel stat-card">
+                        <h2>
+                            <%= stats.redeemed %>
+                        </h2>
+                        <p>Recompensas retiradas</p>
+                    </article>
+                    <article class="panel stat-card stat-card-accent">
+                        <h2>
+                            <%= stats.redemptionRate %>%
+                        </h2>
+                        <p>Visitantes que retiraram</p>
+                    </article>
+                </section>
+
+                <section class="analytics-grid">
+                    <article class="panel chart-panel chart-panel-wide">
+                        <div class="chart-heading">
+                            <div>
+                                <p class="label">FLUXO DA FEIRA</p>
+                                <h3>Visitas por dia</h3>
+                            </div>
+                            <span class="chart-note">últimos 7 dias</span>
+                        </div>
+                        <div class="chart-wrap"><canvas id="dailyChart"
+                                aria-label="Visitas e recompensas por dia"></canvas></div>
+                    </article>
+                    <article class="panel chart-panel">
+                        <div class="chart-heading">
+                            <div>
+                                <p class="label">MOVIMENTO</p>
+                                <h3>Horários de pico</h3>
+                            </div>
+                        </div>
+                        <div class="chart-wrap"><canvas id="hourlyChart" aria-label="Visitas por horário"></canvas>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="insight-strip panel">
+                    <span class="insight-icon"><i class="fa-solid fa-clock"></i></span>
+                    <div>
+                        <p class="label">ÚLTIMA ATUALIZAÇÃO</p>
+                        <strong>
+                            <%= stats.lastVisit ? new Date(stats.lastVisit).toLocaleString('pt-BR')
+                                : 'Nenhuma visita ainda' %>
+                        </strong>
+                    </div>
+                    <span class="insight-divider"></span>
+                    <span class="insight-icon"><i class="fa-solid fa-location-dot"></i></span>
+                    <div>
+                        <p class="label">LOCAL DE RETIRADA</p>
+                        <strong>Estação de Recompensa</strong>
+                    </div>
+                </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; Desenvolvido pela Fábrica de Software - IFC Videira</p>
+        <div class="footer-links">
+            <a href="https://fabrica.videira.ifc.edu.br/" target="_blank" rel="noopener noreferrer"
+                aria-label="Site da Fábrica de Software"><i class="fa-solid fa-globe"></i></a>
+            <a href="https://www.instagram.com/fsw.ifcvideira" target="_blank" rel="noopener noreferrer"
+                aria-label="Instagram da Fábrica de Software"><i class="fa-brands fa-instagram"></i></a>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+        const chartFont = { family: 'monospace', size: 10 };
+        const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#d7d7f2', font: chartFont }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#d7d7f2', precision: 0, font: chartFont }, grid: { color: 'rgba(215, 215, 242, 0.12)' } } } };
+
+        async function renderDashboard() {
+            const response = await fetch('/api/dashboard', { cache: 'no-store' });
+            if (!response.ok) throw new Error('Falha ao carregar os dados');
+            const { daily, hourly } = await response.json();
+
+            new Chart(document.getElementById('dailyChart'), {
+                type: 'line',
+                data: {
+                    labels: daily.map(item => `${String(item.date).slice(8, 10)}/${String(item.date).slice(5, 7)}`),
+                    datasets: [
+                        { label: 'Visitas', data: daily.map(item => item.visits), borderColor: '#4cc9f0', backgroundColor: 'rgba(76, 201, 240, 0.14)', fill: true, tension: 0.35 },
+                        { label: 'Recompensas', data: daily.map(item => item.redeemed), borderColor: '#ffe66d', backgroundColor: 'transparent', tension: 0.35 }
+                    ]
+                },
+                options: { ...chartOptions, plugins: { legend: { labels: { color: '#d7d7f2', font: chartFont } } } }
+            });
+
+            new Chart(document.getElementById('hourlyChart'), {
+                type: 'bar',
+                data: { labels: hourly.map(item => `${String(item.hour).padStart(2, '0')}h`), datasets: [{ label: 'Visitas', data: hourly.map(item => item.visits), backgroundColor: '#ff4d6d', borderRadius: 3 }] },
+                options: { ...chartOptions, plugins: { legend: { display: false } }, scales: { ...chartOptions.scales, x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } } } }
+            });
+        }
+
+        renderDashboard().catch(error => console.error('[dashboard]', error));
+    </script>
+    <script src="/js/pwa.js" defer></script>
+</body>
+
+</html>
