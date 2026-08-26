@@ -36,44 +36,70 @@
         const video = document.getElementById('video');
         const btn = document.getElementById('captureBtn');
         const statusEl = document.getElementById('status');
+        const AUTO_RETRY_MS = 1500;
+        const NEXT_PERSON_DELAY_MS = 2500;
+        let isProcessing = false;
+
+        function hideActionButton() {
+            btn.hidden = true;
+            btn.disabled = true;
+        }
+
+        function scheduleNextPerson() {
+            setTimeout(() => {
+                isProcessing = false;
+                verifyFace();
+            }, NEXT_PERSON_DELAY_MS);
+        }
+
+        async function verifyFace() {
+            if (isProcessing) return;
+
+            isProcessing = true;
+            hideActionButton();
+            statusEl.textContent = 'Detectando rosto...';
+
+            try {
+                const embedding = await captureDescriptor(video);
+                if (!embedding) {
+                    statusEl.textContent = 'Posicione o rosto na câmera para continuar.';
+                    setTimeout(() => {
+                        isProcessing = false;
+                        verifyFace();
+                    }, AUTO_RETRY_MS);
+                    return;
+                }
+
+                statusEl.textContent = 'Enviando...';
+                const result = await sendToApi('/api/capture', embedding);
+
+                if (result.status === 'registered') {
+                    statusEl.textContent = 'Visita registrada com sucesso! Próxima pessoa em instantes.';
+                } else if (result.status === 'already_registered') {
+                    statusEl.textContent = 'Você já estava registrado. Próxima pessoa em instantes.';
+                } else {
+                    statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
+                }
+
+                scheduleNextPerson();
+            } catch (error) {
+                console.error(error);
+                statusEl.textContent = 'Não foi possível verificar seu rosto. Próxima pessoa em instantes.';
+                scheduleNextPerson();
+            }
+        }
 
         async function init() {
             try {
                 await loadModels();
                 await startWebcam(video);
-                btn.disabled = false;
-                btn.textContent = '📷 Registrar minha visita';
-                // statusEl.textContent = 'Câmera pronta!';
+                statusEl.textContent = 'Câmera pronta!';
+                verifyFace();
             } catch (error) {
                 console.error(error);
                 statusEl.textContent = 'Não foi possível carregar o reconhecimento facial.';
             }
         }
-
-        btn.addEventListener('click', async () => {
-            btn.disabled = true;
-            statusEl.textContent = 'Detectando rosto...';
-
-            const embedding = await captureDescriptor(video);
-            if (!embedding) {
-                statusEl.textContent = 'Não consegui ver seu rosto, tente novamente.';
-                btn.disabled = false;
-                return;
-            }
-
-            statusEl.textContent = 'Enviando...';
-            const result = await sendToApi('/api/capture', embedding);
-
-            if (result.status === 'registered') {
-                statusEl.textContent = 'Visita registrada com sucesso! Vá até a estação de recompensa para liberar seu prêmio.';
-            } else if (result.status === 'already_registered') {
-                statusEl.textContent = 'Você já estava registrado..';
-            } else {
-                statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
-            }
-
-            btn.disabled = false;
-        });
 
         init();
     </script>
