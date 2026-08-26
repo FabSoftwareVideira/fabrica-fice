@@ -36,9 +36,21 @@
         const video = document.getElementById('video');
         const btn = document.getElementById('verifyBtn');
         const statusEl = document.getElementById('status');
+        const mainEl = document.querySelector('main');
         const AUTO_RETRY_MS = 1500;
         const NEXT_PERSON_DELAY_MS = 2500;
         let isProcessing = false;
+
+        function flashFeedback(color) {
+            if (!mainEl) return;
+            mainEl.style.transition = 'box-shadow 0.25s ease, background 0.25s ease';
+            mainEl.style.background = color;
+            mainEl.style.boxShadow = `0 0 0 8px ${color}`;
+            setTimeout(() => {
+                mainEl.style.background = '';
+                mainEl.style.boxShadow = '';
+            }, 520);
+        }
 
         function playSuccessSound() {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -128,22 +140,27 @@
                 switch (result.status) {
                     case 'reward_granted':
                         statusEl.textContent = 'Recompensa liberada! Próxima pessoa em instantes.';
+                        flashFeedback('#9ce89d');
                         playSuccessSound();
                         break;
                     case 'already_redeemed':
                         statusEl.textContent = 'Essa recompensa já foi retirada anteriormente. Próxima pessoa em instantes.';
-                        playSuccessSound();
+                        flashFeedback('#f7a7a7');
+                        playErrorSound();
                         break;
                     case 'ambiguous':
                         statusEl.textContent = 'Não tenho certeza, chame um atendente. Próxima pessoa em instantes.';
+                        flashFeedback('#f7a7a7');
                         playErrorSound();
                         break;
                     case 'not_found':
                         statusEl.textContent = 'Não encontramos seu registro. Próxima pessoa em instantes.';
+                        flashFeedback('#f7a7a7');
                         playErrorSound();
                         break;
                     default:
                         statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
+                        flashFeedback('#f7a7a7');
                         playErrorSound();
                 }
 
@@ -151,6 +168,8 @@
             } catch (error) {
                 console.error(error);
                 statusEl.textContent = 'Não foi possível verificar seu rosto. Próxima pessoa em instantes.';
+                flashFeedback('#f7a7a7');
+                playErrorSound();
                 scheduleNextPerson();
             }
         }
