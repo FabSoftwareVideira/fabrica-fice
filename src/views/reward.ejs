@@ -40,6 +40,58 @@
         const NEXT_PERSON_DELAY_MS = 2500;
         let isProcessing = false;
 
+        function playSuccessSound() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            const ctx = new AudioCtx();
+            const notes = [
+                { freq: 880, duration: 0.08, gain: 0.12, delay: 0 },
+                { freq: 1174.66, duration: 0.08, gain: 0.12, delay: 0.08 },
+                { freq: 1174.66, duration: 0.12, gain: 0.12, delay: 0.16 },
+                { freq: 1567.98, duration: 0.16, gain: 0.12, delay: 0.28 },
+            ];
+
+            notes.forEach(({ freq, duration, gain, delay }) => {
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.value = freq;
+                gainNode.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+                gainNode.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + delay + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + duration);
+            });
+        }
+
+        function playErrorSound() {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtx) return;
+
+            const ctx = new AudioCtx();
+            const notes = [
+                { freq: 220, duration: 0.10, gain: 0.10, delay: 0 },
+                { freq: 180, duration: 0.12, gain: 0.10, delay: 0.10 },
+            ];
+
+            notes.forEach(({ freq, duration, gain, delay }) => {
+                const osc = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.value = freq;
+                gainNode.gain.setValueAtTime(0.0001, ctx.currentTime + delay);
+                gainNode.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + delay + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + delay + duration);
+                osc.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + duration);
+            });
+        }
+
         function hideActionButton() {
             btn.hidden = true;
             btn.disabled = true;
@@ -76,18 +128,23 @@
                 switch (result.status) {
                     case 'reward_granted':
                         statusEl.textContent = 'Recompensa liberada! Próxima pessoa em instantes.';
+                        playSuccessSound();
                         break;
                     case 'already_redeemed':
                         statusEl.textContent = 'Essa recompensa já foi retirada anteriormente. Próxima pessoa em instantes.';
+                        playSuccessSound();
                         break;
                     case 'ambiguous':
                         statusEl.textContent = 'Não tenho certeza, chame um atendente. Próxima pessoa em instantes.';
+                        playErrorSound();
                         break;
                     case 'not_found':
                         statusEl.textContent = 'Não encontramos seu registro. Próxima pessoa em instantes.';
+                        playErrorSound();
                         break;
                     default:
                         statusEl.textContent = 'Erro: ' + (result.error || 'tente novamente');
+                        playErrorSound();
                 }
 
                 scheduleNextPerson();

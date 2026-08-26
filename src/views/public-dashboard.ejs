@@ -37,19 +37,19 @@
 
                 <section class="stats-grid public-stats-grid">
                     <article class="panel stat-card">
-                        <h2>
+                        <h2 id="totalVisitorsValue">
                             <%= stats.totalVisitors %>
                         </h2>
                         <p>Visitas ao stand</p>
                     </article>
                     <article class="panel stat-card">
-                        <h2>
+                        <h2 id="redeemedValue">
                             <%= stats.redeemed %>
                         </h2>
                         <p>Recompensas retiradas</p>
                     </article>
                     <article class="panel stat-card stat-card-accent">
-                        <h2>
+                        <h2 id="redemptionRateValue">
                             <%= stats.redemptionRate %>%
                         </h2>
                         <p>Visitantes que retiraram</p>
@@ -84,7 +84,7 @@
                     <span class="insight-icon"><i class="fa-solid fa-clock"></i></span>
                     <div>
                         <p class="label">ÚLTIMA ATUALIZAÇÃO</p>
-                        <strong>
+                        <strong id="lastVisitValue">
                             <%= stats.lastVisit ? new Date(stats.lastVisit).toLocaleString('pt-BR')
                                 : 'Nenhuma visita ainda' %>
                         </strong>
@@ -110,15 +110,41 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
     <script>
+        const REFRESH_INTERVAL_MS = 15000;
         const chartFont = { family: 'monospace', size: 10 };
         const chartOptions = { responsive: true, maintainAspectRatio: false, scales: { x: { ticks: { color: '#d7d7f2', font: chartFont }, grid: { display: false } }, y: { beginAtZero: true, ticks: { color: '#d7d7f2', precision: 0, font: chartFont }, grid: { color: 'rgba(215, 215, 242, 0.12)' } } } };
+        let dailyChart;
+        let hourlyChart;
+
+        const totalVisitorsValue = document.getElementById('totalVisitorsValue');
+        const redeemedValue = document.getElementById('redeemedValue');
+        const redemptionRateValue = document.getElementById('redemptionRateValue');
+        const lastVisitValue = document.getElementById('lastVisitValue');
+
+        function formatPercent(value) {
+            const numeric = Number(value ?? 0);
+            return `${numeric.toFixed(1).replace(/\.0$/, '')}%`;
+        }
+
+        function updateSummary(stats) {
+            if (!stats) return;
+            totalVisitorsValue.textContent = stats.totalVisitors;
+            redeemedValue.textContent = stats.redeemed;
+            redemptionRateValue.textContent = formatPercent(stats.redemptionRate);
+            lastVisitValue.textContent = stats.lastVisit ? new Date(stats.lastVisit).toLocaleString('pt-BR') : 'Nenhuma visita ainda';
+        }
 
         async function renderDashboard() {
             const response = await fetch('/api/dashboard', { cache: 'no-store' });
             if (!response.ok) throw new Error('Falha ao carregar os dados');
-            const { daily, hourly } = await response.json();
+            const { stats, daily, hourly } = await response.json();
 
-            new Chart(document.getElementById('dailyChart'), {
+            updateSummary(stats);
+
+            if (dailyChart) dailyChart.destroy();
+            if (hourlyChart) hourlyChart.destroy();
+
+            dailyChart = new Chart(document.getElementById('dailyChart'), {
                 type: 'line',
                 data: {
                     labels: daily.map(item => `${String(item.date).slice(8, 10)}/${String(item.date).slice(5, 7)}`),
@@ -130,7 +156,7 @@
                 options: { ...chartOptions, plugins: { legend: { labels: { color: '#d7d7f2', font: chartFont } } } }
             });
 
-            new Chart(document.getElementById('hourlyChart'), {
+            hourlyChart = new Chart(document.getElementById('hourlyChart'), {
                 type: 'bar',
                 data: { labels: hourly.map(item => `${String(item.hour).padStart(2, '0')}h`), datasets: [{ label: 'Visitas', data: hourly.map(item => item.visits), backgroundColor: '#ff4d6d', borderRadius: 3 }] },
                 options: { ...chartOptions, plugins: { legend: { display: false } }, scales: { ...chartOptions.scales, x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } } } }
@@ -138,6 +164,9 @@
         }
 
         renderDashboard().catch(error => console.error('[dashboard]', error));
+        setInterval(() => {
+            renderDashboard().catch(error => console.error('[dashboard]', error));
+        }, REFRESH_INTERVAL_MS);
     </script>
     <script src="/js/pwa.js" defer></script>
 </body>
